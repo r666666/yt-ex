@@ -1,0 +1,19 @@
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+#page {
+  margin: 10px;
+}
+#page .input-wrap {
+  display: flex;
+}
+#page .input-wrap .URL-input {
+  width: 100%;
+}

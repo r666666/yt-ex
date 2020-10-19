@@ -1,0 +1,25 @@
+{
+  "name": "yt-ex",
+  "version": "1.0.0",
+  "description": "youtube downloader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/r666666/yt-ex.git"
+  },
+  "author": "R2",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/r666666/yt-ex/issues"
+  },
+  "homepage": "https://github.com/r666666/yt-ex#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "miniget": "^2.0.1",
+    "nodemon": "^2.0.5"
+  }
+}
