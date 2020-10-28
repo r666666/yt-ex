@@ -1,37 +1,30 @@
-const miniget = require('miniget'),
-urllib = require('url'),
+const https = require('https'),
 sig = require('./decipher');
 
 
+const YT_URL = 'https://www.youtube.com/';
 const VIDEO_URL = 'https://www.youtube.com/watch?v=';
+const EMBED_URL = 'https://www.youtube.com/embed/';
 
 
-exports.parseUrl = async(id) => {
-  const params = 'hl=en';
-  const watchPageURL = `${VIDEO_URL + id}&${params}&bpctr=${Math.ceil(Date.now() / 1000)}`;
-  const jsonEndpointURL = `${watchPageURL}&pbj=1`;
+const YTPlayerConfigRex = new RegExp (
+  `<script.+?>` +
+    `.+?ytplayer.+?=.+?ytplayer.+?\\|\\|.+?.+?ytplayer.config.+?=.+?(\\{.+?\\});.+?;` +
+  `<\\/script>`
+);
 
-  const reqOptions = {
-    headers: {
-      'x-youtube-client-name': '1',
-      'x-youtube-client-version': '2.20200529.02.01',
-      'x-youtube-identity-token': ''
-    }
-  };
+const Html5PlayerRex = new RegExp (/<script\s+src="([^"]+)"\s+name="player_ias\/base"\s*>/);
 
-  const body = await miniget(jsonEndpointURL, reqOptions).text();
-  
-  let parsedBody = JSON.parse(body);
-  parsedBody = parsedBody.reduce((part, curr) => Object.assign(curr, part), {});
-
-  let info = JSON.parse(parsedBody.player.args.player_response);
-  info.html5player = urllib.resolve(VIDEO_URL, parsedBody.player.assets.js);
-
-  return info;
-};
 
 exports.getInfo = async(id) => {
-  let info = await exports.parseUrl(id);
+  const html = await exports.getHttpsData(VIDEO_URL + id);
+  const embedHtml = await exports.getHttpsData(EMBED_URL + id);
+
+  const playerBody = JSON.parse(YTPlayerConfigRex.exec(html)[1]);
+
+  const info = JSON.parse(playerBody.args.player_response);
+  info.html5player = YT_URL + Html5PlayerRex.exec(embedHtml)[1];
+  
   info.formats = getFormats(info.streamingData);
   
   // Check if video is deciphered
@@ -53,9 +46,20 @@ exports.getInfo = async(id) => {
   };
 }
 
-getFormats = data => {
-  let formats = [];
+exports.getHttpsData = (url) => {
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      let source = '';
+      res.on('data', chunk => source += chunk);
+      res.on('end', () => resolve(source));
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
+getFormats = (data) => {
+  let formats = [];
   if (data.formats) {
     formats = formats.concat(data.formats);
   }

@@ -1,8 +1,9 @@
-const miniget = require('miniget'),
-querystring = require('querystring');
+const querystring = require('querystring'),
+util = require('./util');
 
 
-const funcRegexp = new RegExp (`function\\(\\w\\)\\{` +
+const funcRegexp = new RegExp (
+  `function\\(\\w\\)\\{` +
     `\\w=\\w\\.split\\((?:''|"")\\);` +
     `(\\w*).\\w*\\(a,\\d*\\);` +
     `(.+)` +
@@ -13,7 +14,7 @@ const objStr = '\\{([\\w\\W]+?)\\};';
 
 
 exports.signatureDecipher = async(formats, html5player) => {
-  const playerBody = await miniget(html5player).text();
+  const playerBody = await util.getHttpsData(html5player);
   const decipheredFormats = [];
 
   formats.forEach(format => {
