@@ -11,12 +11,21 @@ convertBtn.addEventListener('click', () => {
 async function convert(query) {
   const res = await fetch(`${serverURL}/convert?url=${query}`);
 
-  if(res.status === 200) {
-		res.json().then((result) => {
-			renderData(result);
-		});
-	} else if(res.status === 400) {
-		alert('Enter valid url');
+  // if(res.status === 200) {
+	// 	res.json().then((result) => {
+	// 		renderData(result);
+	// 	});
+	// } else if(res.status === 400) {
+	// 	alert('Enter valid url');
+	// }
+
+	if(res.status == 200) {
+		var a = document.createElement('a');
+  		a.href = `${serverURL}/convert?url=${query}`;
+  		a.setAttribute('download', '');
+		a.click();
+	} else if(res.status == 400) {
+		alert('Invalid url');
 	}
 }
 

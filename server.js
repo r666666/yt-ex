@@ -22,7 +22,10 @@ app.get('/convert', async (req, res, next) => {
 		const id = req.query.url.split('=')[1];
 		const info = await ytEx.getInfo(id);
 
-		res.json(info);
+		res.header('Content-Disposition', `attachment; filename="${info.title}.mp4"`);
+		ytEx.download(info.formats[0]).pipe(res);
+		
+		//res.json(info);
 	} catch (err) {
 		console.error(err);
 	}

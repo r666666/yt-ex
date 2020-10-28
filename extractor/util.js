@@ -46,9 +46,9 @@ exports.getInfo = async(id) => {
   };
 }
 
-exports.getHttpsData = (url) => {
+exports.getHttpsData = (options) => {
   return new Promise((resolve, reject) => {
-    https.get(url, res => {
+    https.get(options, res => {
       let source = '';
       res.on('data', chunk => source += chunk);
       res.on('end', () => resolve(source));
@@ -57,6 +57,21 @@ exports.getHttpsData = (url) => {
     });
   });
 }
+
+exports.download = async(format, stream) => {
+  await dl(format.url, stream);
+}
+
+dl = (url, stream) => {
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      resolve(res.pipe(stream, true));
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+}
+
 
 getFormats = (data) => {
   let formats = [];
