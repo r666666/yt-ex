@@ -1,6 +1,6 @@
-const util = require('./util');
+const PassThrough = require('stream').PassThrough,
+util = require('./util');
 
-const PassThrough = require('stream').PassThrough;
 
 const ytEx = {};
 module.exports = ytEx;

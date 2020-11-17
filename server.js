@@ -3,7 +3,7 @@ path = require('path'),
 cors = require('cors'),
 bodyParser = require('body-parser'),
 ytEx = require('./extractor/index');
-
+const contentDisposition = require('content-disposition');
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,10 +21,15 @@ app.get('/convert', async (req, res, next) => {
 		// Get video id
 		const id = req.query.url.split('=')[1];
 		const info = await ytEx.getInfo(id);
-
-		res.header('Content-Disposition', `attachment; filename="${info.title}.mp4"`);
-		ytEx.download(info.formats[0]).pipe(res);
 		
+		res.writeHead(200, {
+			'Content-Disposition': contentDisposition(info.title + '.mp3'),
+			'Content-Transfer-Encoding': 'binary',
+    	'Content-Type': 'application/octet-stream'
+			}
+		)
+		ytEx.download(info.format).pipe(res);
+
 		//res.json(info);
 	} catch (err) {
 		console.error(err);
