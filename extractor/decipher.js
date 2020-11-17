@@ -13,20 +13,15 @@ const funcRegexp = new RegExp (
 const objStr = '\\{([\\w\\W]+?)\\};';
 
 
-exports.signatureDecipher = async(formats, html5player) => {
+exports.signatureDecipher = async(format, html5player) => {
   const playerBody = await util.getHttpsData(html5player);
-  const decipheredFormats = [];
 
-  formats.forEach(format => {
-    Object.assign(format, querystring.parse(format.signatureCipher || format.cipher));
+  Object.assign(format, querystring.parse(format.signatureCipher || format.cipher));
 
-    const signature = execute(playerBody, format.s);
-    format.url = `${format.url}&sig=${signature}`;
+  const signature = execute(playerBody, format.s);
+  format.url = `${format.url}&sig=${signature}`;
 
-    decipheredFormats.push(format);
-  });
-  
-  return decipheredFormats;
+  return format;
 };
 
 /*

@@ -25,16 +25,16 @@ exports.getInfo = async(id) => {
   const info = JSON.parse(playerBody.args.player_response);
   info.html5player = YT_URL + Html5PlayerRex.exec(embedHtml)[1];
   
-  info.formats = getFormats(info.streamingData);
+  info.format = parseFormats(info.streamingData);
   
   // Check if video is deciphered
-  if(!info.formats[0]['url']) {
+  if (!info.format.url) {
     const funcs = [];
 
-    funcs.push(sig.signatureDecipher(info.formats, info.html5player));
+    funcs.push(sig.signatureDecipher(info.format, info.html5player));
     const results = await Promise.all(funcs);
 
-    info.formats = Object.values(Object.assign({}, ...results));
+    info.format = results[0];
   }
 
   return {
@@ -42,13 +42,13 @@ exports.getInfo = async(id) => {
     title: info.videoDetails.title,
     length: info.videoDetails.lengthSeconds,
     thumbnail: info.videoDetails.thumbnail.thumbnails[0]['url'],
-    formats: info.formats
+    format: info.format
   };
 }
 
-exports.getHttpsData = (url) => {
+exports.getHttpsData = (options) => {
   return new Promise((resolve, reject) => {
-    https.get(url, res => {
+    https.get(options, res => {
       let source = '';
       res.on('data', chunk => source += chunk);
       res.on('end', () => resolve(source));
@@ -58,7 +58,22 @@ exports.getHttpsData = (url) => {
   });
 }
 
-getFormats = (data) => {
+exports.download = async(format, stream) => {
+  await dl(format.url, stream);
+}
+
+dl = (url, stream) => {
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      resolve(res.pipe(stream, true));
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+}
+
+
+parseFormats = (data) => {
   let formats = [];
   if (data.formats) {
     formats = formats.concat(data.formats);
@@ -67,6 +82,25 @@ getFormats = (data) => {
     formats = formats.concat(data.adaptiveFormats);
   }
 
-  return formats;
+  return filterFormats(formats, '');
 };
+
+filterFormats = (formats, options) => {
+  const type = options.type || 'audio';
+  const filteredFormats = [];
+
+  formats.forEach(format => {
+    switch(type) {
+      case 'audio': {
+        if (format.mimeType.includes('audio')) {
+          filteredFormats.push(format);
+        }
+        break;
+      }
+    }
+  });
+
+  // get the best quality
+  return filteredFormats.sort((a, b) => a.bitrate - b.bitrate).reverse()[0];
+}
 
