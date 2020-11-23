@@ -5,6 +5,7 @@ sig = require('./decipher');
 const YT_URL = 'https://www.youtube.com/';
 const VIDEO_URL = 'https://www.youtube.com/watch?v=';
 const EMBED_URL = 'https://www.youtube.com/embed/';
+const PLAYLIST_URL = 'https://www.youtube.com/playlist?list=';
 
 
 const YTPlayerConfigRex = new RegExp (
@@ -12,6 +13,8 @@ const YTPlayerConfigRex = new RegExp (
     `.+?ytplayer.+?=.+?ytplayer.+?\\|\\|.+?.+?ytplayer.config.+?=.+?(\\{.+?\\});.+?;` +
   `<\\/script>`
 );
+
+const YTPageDataRex = new RegExp (/window\["ytInitialData"\] = \{(.*)\}/);
 
 const Html5PlayerRex = new RegExp (/<script\s+src="([^"]+)"\s+name="player_ias\/base"\s*>/);
 
@@ -44,6 +47,21 @@ exports.getInfo = async(id) => {
     thumbnail: info.videoDetails.thumbnail.thumbnails[0]['url'],
     format: info.format
   };
+}
+
+exports.getPlaylistInfo = async(id) => {
+  const html = await exports.getHttpsData(PLAYLIST_URL + id);
+  const mediaJsonArray = html.match(/{"playlistVideoRenderer":{([\w\W]+?)}]}}}]}}/g);
+  const mediaArray = [];
+
+  mediaJsonArray.forEach(element => {
+    const objectStr = element
+      .replace(`"playlistVideoRenderer":{`, '')
+      .replace(`}]}}}]}}`, '}]}}}]}');
+    mediaArray.push(JSON.parse(objectStr));
+  });
+
+  return mediaArray;
 }
 
 exports.getHttpsData = (options) => {

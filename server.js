@@ -29,8 +29,18 @@ app.get('/convert', async (req, res, next) => {
 			}
 		)
 		ytEx.download(info.format).pipe(res);
+	} catch (err) {
+		console.error(err);
+	}
+});
 
-		//res.json(info);
+app.get('/convertPlaylist', async (req, res, next) => {
+	try {
+		// Get video id
+		const id = req.query.url.split('=')[1];
+		const info = await ytEx.getPlaylistInfo(id);
+		
+		res.json(info);
 	} catch (err) {
 		console.error(err);
 	}

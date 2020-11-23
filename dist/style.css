@@ -8,12 +8,35 @@ body {
   width: 100%;
   margin: 0;
 }
-#page {
-  margin: 10px;
+.page-box {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-#page .input-wrap {
+.page {
+  display: block;
+  margin: 30px;
+}
+.page-title {
+  margin-top: 0;
+}
+.input-wrap {
   display: flex;
+  margin-bottom: 30px;
 }
-#page .input-wrap .URL-input {
+.URL-input {
   width: 100%;
+}
+.video-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.video-info .video-thumbnail {
+  margin: 0 10px;
+}
+.video-info .text-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
